@@ -11,7 +11,7 @@ import com.crud.customers.entity.CustomerIndividualEntity
 
 object EntityToDTOExtension {
 
-    fun CustomerEntity.toDTO(document: String) = CustomerDTO(
+    fun CustomerEntity.toDTO(document: String?) = CustomerDTO(
         this.customerID!!,
         document,
         this.telephone,

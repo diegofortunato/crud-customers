@@ -13,6 +13,8 @@ import com.crud.customers.repository.CustomerRepository
 import com.crud.customers.service.CustomerService
 import com.crud.customers.util.APIUtil
 import org.slf4j.LoggerFactory
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.util.*
@@ -60,6 +62,32 @@ class CustomerServiceImpl(
         return customerRepository.save(customer).toDTO(document)
     }
 
+    override fun findAllConsumer(paging: PageRequest): Page<CustomerDTO> {
+        log.info("Find All Customer service.")
+
+        return customerRepository.findAll(paging).map { customer -> customer.toDTO(null) }
+    }
+
+    override fun deleteCustomer(customerID: Long) {
+        log.info("Delete Customer service")
+
+        val customerDB = customerRepository.findById(customerID)
+            .orElseThrow { EntityNotFoundException(APIConstant.ERROR_404) }
+
+        customerRepository.delete(customerDB)
+    }
+
+    override fun updateCustomer(customerID: Long, customerRequest: CustomerEntity): CustomerDTO {
+        log.info("Update Customer service")
+
+        val customerDB = customerRepository.findById(customerID)
+            .orElseThrow { EntityNotFoundException(APIConstant.ERROR_404) }
+
+        updateFieldsCustomer(customerDB, customerRequest)
+
+        return customerRepository.save(customerDB).toDTO(null)
+    }
+
     private fun setValuesCustomer(customerRequest: CustomerEntity, individual: CustomerIndividualEntity?, corporate: CustomerCorporateEntity?): CustomerEntity {
         return CustomerEntity(
             null,
@@ -72,6 +100,12 @@ class CustomerServiceImpl(
             LocalDate.now(),
             LocalDate.now()
         )
+    }
+
+    private fun updateFieldsCustomer(customerDB: CustomerEntity?, customerRequest: CustomerEntity) {
+        customerDB!!.telephone = customerRequest.telephone
+        customerDB.email = customerRequest.email
+        customerDB.address = customerRequest.address
     }
 
     private fun verifyCustomers(customerIndividual: Optional<CustomerIndividualEntity>,customerCorporate: Optional<CustomerCorporateEntity>) {

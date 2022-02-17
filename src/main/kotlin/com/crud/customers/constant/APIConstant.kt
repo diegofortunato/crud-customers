@@ -5,7 +5,10 @@ class APIConstant {
     companion object {
         const val BASE_API = "/v1"
         const val SERVICE_CREATE_CUSTOMER = "/customer"
-        const val SERVICE_GET_CUSTOMER = "/customer"
+        const val SERVICE_GET_ALL_CUSTOMER = "/customer"
+        const val SERVICE_GET_CUSTOMER = "/customer/{id}"
+        const val SERVICE_DELETE_CUSTOMER = "/customer/{id}"
+        const val SERVICE_UPDATE_CUSTOMER = "/customer/{id}"
 
         const val ERROR_400 = "Entity already exists in the system."
         const val ERROR_404 = "Entity does not exist in the system."
