@@ -1,4 +1,4 @@
-package com.crud.customers.extension
+package com.crud.customers.util.extension
 
 import com.crud.customers.dto.AddressDTO
 import com.crud.customers.dto.CustomerDTO

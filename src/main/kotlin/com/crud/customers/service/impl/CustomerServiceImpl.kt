@@ -1,20 +1,22 @@
 package com.crud.customers.service.impl
 
+import com.crud.customers.constant.APIConstant
 import com.crud.customers.constant.CustomerStatusEnum
-import com.crud.customers.constant.CustomerTypeEnum
 import com.crud.customers.dto.CustomerDTO
 import com.crud.customers.entity.CustomerCorporateEntity
 import com.crud.customers.entity.CustomerEntity
 import com.crud.customers.entity.CustomerIndividualEntity
-import com.crud.customers.extension.EntityToDTOExtension.toDTO
+import com.crud.customers.util.extension.EntityToDTOExtension.toDTO
 import com.crud.customers.repository.CustomerCorporateRepository
 import com.crud.customers.repository.CustomerIndividualRepository
 import com.crud.customers.repository.CustomerRepository
 import com.crud.customers.service.CustomerService
+import com.crud.customers.util.APIUtil
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.util.*
+import javax.persistence.EntityNotFoundException
 
 @Service
 class CustomerServiceImpl(
@@ -28,23 +30,27 @@ class CustomerServiceImpl(
     override fun createCustomer(customerRequest: CustomerEntity, document: String): CustomerDTO {
         log.info("Create Customer service")
 
+        val editedDocument = APIUtil.removeSpecialCaracters(document)
+
         val numbersContainsCPF = 11
         val numbersContainsCNPJ = 14
 
         var customerIndividual = Optional.empty<CustomerIndividualEntity>()
         var customerCorporate = Optional.empty<CustomerCorporateEntity>()
 
-        when (document.length) {
+        when (editedDocument.length) {
             numbersContainsCPF -> {
-                customerIndividual = customerIndividualRepository.findById(document)
+                customerIndividual = customerIndividualRepository.findById(editedDocument)
             }
             numbersContainsCNPJ -> {
-                customerCorporate = customerCorporateRepository.findById(document)
+                customerCorporate = customerCorporateRepository.findById(editedDocument)
             }
             else -> {
-                // Lançar exceção
+                throw EntityNotFoundException(APIConstant.DETAILS_ERROR_404)
             }
         }
+
+        verifyCustomers(customerIndividual, customerCorporate)
 
         val individual = if (customerIndividual.isPresent) customerIndividual.get() else null
         val corporate = if (customerCorporate.isPresent) customerCorporate.get() else null
@@ -66,5 +72,9 @@ class CustomerServiceImpl(
             LocalDate.now(),
             LocalDate.now()
         )
+    }
+
+    private fun verifyCustomers(customerIndividual: Optional<CustomerIndividualEntity>,customerCorporate: Optional<CustomerCorporateEntity>) {
+        if (customerIndividual.isEmpty && customerCorporate.isEmpty) throw EntityNotFoundException(APIConstant.DETAILS_ERROR_404)
     }
 }

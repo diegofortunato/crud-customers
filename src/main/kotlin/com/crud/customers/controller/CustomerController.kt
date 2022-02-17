@@ -4,7 +4,7 @@ import com.crud.customers.constant.APIConstant
 import com.crud.customers.controller.request.Request
 import com.crud.customers.controller.response.Response
 import com.crud.customers.dto.CustomerDTO
-import com.crud.customers.extension.DTOTOEntityExtension.toEntity
+import com.crud.customers.util.extension.DTOTOEntityExtension.toEntity
 import com.crud.customers.service.CustomerService
 import org.slf4j.LoggerFactory
 import org.springframework.http.ResponseEntity
