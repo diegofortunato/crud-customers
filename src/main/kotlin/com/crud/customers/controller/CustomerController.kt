@@ -26,7 +26,10 @@ class CustomerController(private val customerService: CustomerService) {
     fun createCustomer(@Valid @RequestBody customerRequest: Request<CustomerDTO>): ResponseEntity<Response<CustomerDTO>> {
         log.info("POST ${APIConstant.SERVICE_CREATE_CUSTOMER} for customer {}", customerRequest.request)
 
-        val customer = customerService.createCustomer(customerRequest.request.toEntity())
+        val customer = customerService.createCustomer(
+            customerRequest.request.toEntity(),
+            customerRequest.request.document!!
+        )
         return ResponseEntity
             .created(
                 URI.create(
