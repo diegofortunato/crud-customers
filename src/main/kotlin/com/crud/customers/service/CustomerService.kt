@@ -7,7 +7,7 @@ import org.springframework.data.domain.PageRequest
 
 interface CustomerService {
     fun createCustomer(customerRequest: CustomerEntity, document: String): CustomerDTO
-    fun findAllConsumer(paging: PageRequest): Page<CustomerDTO>
+    fun findConsumer(paging: PageRequest, customerName: String, customerType: String): Page<CustomerDTO>
     fun deleteCustomer(customerID: Long)
     fun updateCustomer(customerID: Long, customer: CustomerEntity): CustomerDTO
 }

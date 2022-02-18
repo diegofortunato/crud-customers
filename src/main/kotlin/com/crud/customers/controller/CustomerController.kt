@@ -44,16 +44,18 @@ class CustomerController(private val customerService: CustomerService) {
             .body(Response(data = customer))
     }
 
-    @GetMapping(APIConstant.SERVICE_GET_ALL_CUSTOMER)
+    @GetMapping(APIConstant.SERVICE_GET_CUSTOMER)
     fun findAllConsumers(
-        @RequestParam(name = "page", defaultValue = "0") page: Int,
-        @RequestParam(name = "size", defaultValue = "10") size: Int
+        @RequestParam(name = "page", defaultValue = "0", required = false) page: Int,
+        @RequestParam(name = "size", defaultValue = "10", required = false) size: Int,
+        @RequestParam(name = "name", defaultValue = "", required = false) customerName: String,
+        @RequestParam(name = "type", defaultValue = "", required = false) customerType: String,
     ): ResponseEntity<ResponsePagination<List<CustomerDTO>>> {
-        log.info("GET ALL ${APIConstant.SERVICE_GET_ALL_CUSTOMER}")
+        log.info("GET ALL ${APIConstant.SERVICE_GET_CUSTOMER}")
 
         val paging = PageRequest.of(page, size)
 
-        val response = customerService.findAllConsumer(paging)
+        val response = customerService.findConsumer(paging, customerName, customerType)
         return ResponseEntity.ok(
             ResponsePagination(
                 data = response.content,

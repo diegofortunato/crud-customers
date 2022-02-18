@@ -5,8 +5,7 @@ class APIConstant {
     companion object {
         const val BASE_API = "/v1"
         const val SERVICE_CREATE_CUSTOMER = "/customer"
-        const val SERVICE_GET_ALL_CUSTOMER = "/customer"
-        const val SERVICE_GET_CUSTOMER = "/customer/{id}"
+        const val SERVICE_GET_CUSTOMER = "/customer"
         const val SERVICE_DELETE_CUSTOMER = "/customer/{id}"
         const val SERVICE_UPDATE_CUSTOMER = "/customer/{id}"
 

@@ -2,6 +2,7 @@ package com.crud.customers.service.impl
 
 import com.crud.customers.constant.APIConstant
 import com.crud.customers.constant.CustomerStatusEnum
+import com.crud.customers.constant.CustomerTypeEnum
 import com.crud.customers.dto.CustomerDTO
 import com.crud.customers.entity.CustomerCorporateEntity
 import com.crud.customers.entity.CustomerEntity
@@ -18,6 +19,7 @@ import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.util.*
+import javax.persistence.EntityExistsException
 import javax.persistence.EntityNotFoundException
 
 @Service
@@ -42,9 +44,11 @@ class CustomerServiceImpl(
 
         when (editedDocument.length) {
             numbersContainsCPF -> {
+                verifyCustomerExists(editedDocument, CustomerTypeEnum.PF)
                 customerIndividual = customerIndividualRepository.findById(editedDocument)
             }
             numbersContainsCNPJ -> {
+                verifyCustomerExists(editedDocument, CustomerTypeEnum.PJ)
                 customerCorporate = customerCorporateRepository.findById(editedDocument)
             }
             else -> {
@@ -62,8 +66,14 @@ class CustomerServiceImpl(
         return customerRepository.save(customer).toDTO(document)
     }
 
-    override fun findAllConsumer(paging: PageRequest): Page<CustomerDTO> {
+    override fun findConsumer(paging: PageRequest, customerName: String, customerType: String): Page<CustomerDTO> {
         log.info("Find All Customer service.")
+
+        if(customerType != "" && CustomerTypeEnum.PF.value == customerType.uppercase()){
+            return customerRepository.findAllByCustomerIndividualFullNameContaining(customerName, paging).map { customer -> customer.toDTO(null) }
+        }else if(customerType != "" && CustomerTypeEnum.PJ.value == customerType.uppercase()){
+            return customerRepository.findAllByCustomerCorporateCompanyNameContaining(customerName, paging).map { customer -> customer.toDTO(null) }
+        }
 
         return customerRepository.findAll(paging).map { customer -> customer.toDTO(null) }
     }
@@ -77,13 +87,13 @@ class CustomerServiceImpl(
         customerRepository.delete(customerDB)
     }
 
-    override fun updateCustomer(customerID: Long, customerRequest: CustomerEntity): CustomerDTO {
+    override fun updateCustomer(customerID: Long, customer: CustomerEntity): CustomerDTO {
         log.info("Update Customer service")
 
         val customerDB = customerRepository.findById(customerID)
             .orElseThrow { EntityNotFoundException(APIConstant.ERROR_404) }
 
-        updateFieldsCustomer(customerDB, customerRequest)
+        updateFieldsCustomer(customerDB, customer)
 
         return customerRepository.save(customerDB).toDTO(null)
     }
@@ -110,5 +120,15 @@ class CustomerServiceImpl(
 
     private fun verifyCustomers(customerIndividual: Optional<CustomerIndividualEntity>,customerCorporate: Optional<CustomerCorporateEntity>) {
         if (customerIndividual.isEmpty && customerCorporate.isEmpty) throw EntityNotFoundException(APIConstant.DETAILS_ERROR_404)
+    }
+
+    private fun verifyCustomerExists(editedDocument: String, customerType: CustomerTypeEnum) {
+        if(customerType == CustomerTypeEnum.PF){
+            if (customerRepository.findByCustomerIndividualCpf(editedDocument).isPresent)
+                throw EntityExistsException(APIConstant.ERROR_400)
+        }else{
+            if (customerRepository.findByCustomerCorporateCnpj(editedDocument).isPresent)
+                throw EntityExistsException(APIConstant.ERROR_400)
+        }
     }
 }
